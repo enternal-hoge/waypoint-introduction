@@ -152,9 +152,189 @@ Logged in.
 
 ## First Project Deploy
 
-TBD
+### Deploy Example Node.js Application on Docker
+
+Download the example source codes.
+
+```bash
+$ git clone https://github.com/hashicorp/waypoint-examples.git
+$ ls docker
+angular		go		next-js		php		reactjs		static
+aspnetapp	java		nodejs		python		ruby		svelte
+$ cd docker/nodejs
+```
+
+Confirm waypoint.hcl file and initialize.
+
+```bash
+$ cat waypoint.hcl 
+project = "example-nodejs"
+
+app "example-nodejs" {
+  labels = {
+    "service" = "example-nodejs",
+    "env"     = "dev"
+  }
+
+  build {
+    use "pack" {}
+  }
+
+  deploy {
+    use "docker" {}
+  }
+}
+
+$ waypoint init
+✓ Configuration file appears valid
+✓ Connection to Waypoint server was successful
+✓ Project "example-nodejs" and all apps are registered with the server.
+✓ Plugins loaded and configured successfully
+
+Project initialized!
+
+You may now call 'waypoint up' to deploy your project or
+commands such as 'waypoint build' to perform steps individually.
+```
+
+Registered example project on waypoint UI.
+
+![04](./img/04.jpg)
+
+Nothing is displayed in the Build, Depoly, Release.
+
+![05](./img/05.jpg)
+
+Deploy example application on Docker.
+
+```bash
+$ waypoint up
+
+» Building...
+Creating new buildpack-based image using builder: heroku/buildpacks:18
+✓ Creating pack client
+✓ Building image
+ │ [exporter] Adding layer 'launcher'
+ │ [exporter] Adding layer 'config'
+ │ [exporter] Adding label 'io.buildpacks.lifecycle.metadata'
+ │ [exporter] Adding label 'io.buildpacks.build.metadata'
+ │ [exporter] Adding label 'io.buildpacks.project.metadata'
+ │ [exporter] Saving index.docker.io/library/example-nodejs:latest...
+ │ [exporter] *** Images (1cabe60212cc):
+ │ [exporter]       index.docker.io/library/example-nodejs:latest
+ │ [exporter] Adding cache layer 'heroku/nodejs-engine:nodejs'
+ │ [exporter] Adding cache layer 'heroku/nodejs-engine:toolbox'
+✓ Injecting entrypoint binary to image
+
+Generated new Docker image: example-nodejs:latest
+
+» Deploying...
+✓ Setting up waypoint network
+✓ Starting container
+✓ App deployed as container: example-nodejs-01F4N6TXCQT69GPA0ZV6G1JRQB
+
+» Releasing...
+
+The deploy was successful! A Waypoint deployment URL is shown below. This
+can be used internally to check your deployment and is not meant for external
+traffic. You can manage this hostname using "waypoint hostname."
+
+           URL: https://mutually-genuine-mutt.waypoint.run
+Deployment URL: https://mutually-genuine-mutt--v1.waypoint.run
+```
+
+### Confirm Waypoint UI
+
+See the following URL in your browser, confirm deplyed example application.
+
+https://mutually-genuine-mutt--v1.waypoint.run
+
+![06](./img/06.jpg)
+
+Waypoint UI.
+
+https://localhost:9702
+
+
+Confirm build, deployed, released.
+
+![07](./img/07.jpg)
+
+### Confirm Docker
+
+execute docker command.
+
+```bash
+$ docker ps -a
+CONTAINER ID        IMAGE                           COMMAND                  CREATED             STATUS                    PORTS                              NAMES
+622e7ad5b2c9        example-nodejs:latest           "/waypoint-entrypoin…"   16 minutes ago      Up 16 minutes             0.0.0.0:32768->3000/tcp            example-nodejs-01F4N6TXCQT69GPA0ZV6G1JRQB
+```
+
+### waypoint exec
+
+waypoint ui 0.3.1 does not yet implement waypoint exec.
+
+![08](./img/08.jpg)
+
+execute waypoint cli waypoint exec.
+
+```bash
+$ waypoint exec -app=example-nodejs /bin/sh
+Connected to deployment v1
+$ ls
+app  boot  dev	home   layers  lib64  mnt  proc  run   srv  tmp  var		      workspace
+bin  cnb   etc	input  lib     media  opt  root  sbin  sys  usr  waypoint-entrypoint
+$ cd workspace
+$ ls
+Procfile  README.md  index.js  node_modules  package.json  public  views  waypoint.hcl
+$ exit
+```
+
+### waypoint log
+
+```bash
+$ waypoint logs
+2021-05-02T00:14:47.748Z E4N98S: [INFO]  entrypoint: entrypoint starting:
+deployment_id=01F4N6TWSBNH33FES64SMRAR8E instance_id=01F4N6TXWSHVF0BTWE3FE4N98S args=[/cnb/lifecycle/launcher]
+2021-05-02T00:14:47.748Z E4N98S: [INFO]  entrypoint: entrypoint version: full_string=v0.3.1 version=v0.3.1
+prerelease= metadata= revision=
+2021-05-02T00:14:47.748Z E4N98S: [INFO]  entrypoint: server version info: version=v0.3.1 api_min=1
+api_current=1 entrypoint_min=1 entrypoint_current=1
+2021-05-02T00:14:48.449Z E4N98S: [INFO]  entrypoint.config.watcher: env vars changed, sending new child command
+2021-05-02T00:14:48.450Z E4N98S: [INFO]  entrypoint.child: starting child process:
+args=[/cnb/lifecycle/launcher] cmd=/cnb/lifecycle/launcher
+2021-05-02T00:14:48.750Z E4N98S: Listening on 3000
+2021-05-02T00:44:42.817Z E4N98S: [INFO]  entrypoint.exec: starting exec stream: index=1 args=[/bin/sh]
+2021-05-02T00:44:42.818Z E4N98S: [INFO]  entrypoint.exec: pty requested, allocating a pty: index=1
+2021-05-02T00:45:31.267Z E4N98S: [INFO]  entrypoint.exec: exec stream exited: index=1 code=127
+2021-05-02T00:45:31.271Z E4N98S: [INFO]  entrypoint.exec: exec stream ended by client: index=1
+2021-05-02T00:45:59.887Z E4N98S: [INFO]  entrypoint.exec: starting exec stream: index=2 args=[/bin/sh]
+2021-05-02T00:45:59.887Z E4N98S: [INFO]  entrypoint.exec: pty requested, allocating a pty: index=2
+2021-05-02T00:51:07.176Z E4N98S: [INFO]  entrypoint.exec: exec stream exited: index=2 code=0
+2021-05-02T00:51:07.180Z E4N98S: [INFO]  entrypoint.exec: exec stream ended by client: index=2
+```
+
+## Other Commands.
+
+```bash
+$ waypoint project list 
+example-nodejs
+
+$ waypoint hostname list
+        HOSTNAME        |                FQDN                |
+LABELS                                                                 
+------------------------+------------------------------------+----------------------------------------------------------
+  mutually-genuine-mutt | mutually-genuine-mutt.waypoint.run | map[waypoint.hashicorp.com/app:example-nodejswaypoint.hashicorp.com/project:example-nodejs waypoint.hashicorp.com/workspace:default]  
+
+$ waypoint artifact list
+    | ID | REGISTRY | DETAILS |    STARTED     |   COMPLETED     
+----+----+----------+---------+----------------+-----------------
+  ✔ |  1 | pack     | build:1 | 23 minutes ago | 23 minutes ago  
+```
 
 ## Reference
 
 https://learn.hashicorp.com/tutorials/waypoint/get-started-install
+
+https://www.waypointproject.io/commands
 
