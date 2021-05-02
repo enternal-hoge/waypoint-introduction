@@ -201,7 +201,7 @@ Registered example project on waypoint UI.
 
 ![04](./img/04.jpg)
 
-Nothing is displayed in the Build, Depoly, Release.
+Nothing is displayed in the Builds, Depolyments, Releases.
 
 ![05](./img/05.jpg)
 
@@ -255,7 +255,7 @@ Waypoint UI.
 
 https://localhost:9702
 
-Confirm build, deployed, released.
+Confirm Builds, Deployments, Release.
 
 ![07](./img/07.jpg)
 
@@ -382,7 +382,7 @@ heroku/pack                                <none>
 ...
 ```
 
-Confirm waypoint ui, appear v2 build, deploy, release information.
+Confirm waypoint ui, appear v2 Builds, Deployments, Releases information.
 
 ![10](./img/10.jpg)
 
