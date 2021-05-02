@@ -7,7 +7,7 @@ I tried the first step of waypoint.
 - Docker Desktop
 - brew(for mac)
 
-## Install Waypoint CLI
+## 1. Install Waypoint CLI
 
 Install waypoint cli tool.
 
@@ -20,7 +20,7 @@ $ waypoint version
 CLI: v0.3.1 (b550e5ce)
 ```
 
-## Install Waypoint Server Locally
+## 2. Install Waypoint Server Locally
 
 Install waypoint server using docker.
 
@@ -122,7 +122,7 @@ $ docker inspect 54254cd2321f
 ```
 
 
-## Access Local Server
+## 3. Access Local Server
 
 Access own your browser.
 
@@ -150,9 +150,9 @@ Logged in.
 ![03](./img/03.jpg)
 
 
-## First Project Deploy
+## 4. First Project Deploy
 
-### Deploy Example Node.js Application on Docker
+### 4.1. Deploy Example Node.js Application on Docker
 
 Download the example source codes.
 
@@ -243,7 +243,7 @@ traffic. You can manage this hostname using "waypoint hostname."
 Deployment URL: https://mutually-genuine-mutt--v1.waypoint.run
 ```
 
-### Confirm Waypoint UI
+### 4.2. Confirm Waypoint UI
 
 See the following URL in your browser, confirm deplyed example application.
 
@@ -255,12 +255,11 @@ Waypoint UI.
 
 https://localhost:9702
 
-
 Confirm build, deployed, released.
 
 ![07](./img/07.jpg)
 
-### Confirm Docker
+### 4.3. Confirm Docker
 
 execute docker command.
 
@@ -270,7 +269,7 @@ CONTAINER ID        IMAGE                           COMMAND                  CRE
 622e7ad5b2c9        example-nodejs:latest           "/waypoint-entrypoin…"   16 minutes ago      Up 16 minutes             0.0.0.0:32768->3000/tcp            example-nodejs-01F4N6TXCQT69GPA0ZV6G1JRQB
 ```
 
-### waypoint exec
+### 4.4. waypoint exec
 
 waypoint ui 0.3.1 does not yet implement waypoint exec.
 
@@ -290,7 +289,7 @@ Procfile  README.md  index.js  node_modules  package.json  public  views  waypoi
 $ exit
 ```
 
-### waypoint log
+### 4.5. waypoint log
 
 ```bash
 $ waypoint logs
@@ -314,7 +313,120 @@ args=[/cnb/lifecycle/launcher] cmd=/cnb/lifecycle/launcher
 2021-05-02T00:51:07.180Z E4N98S: [INFO]  entrypoint.exec: exec stream ended by client: index=2
 ```
 
-## Other Commands.
+## 5. Change Source Code and ReDeploy
+
+```bash
+$ vi views/pages/index.ejs
+$ cat views/pages/index.ejs
+...
+        <h1>This Node.js app was deployed with Waypoint.</h1>
+        <h2>Hello Hoge!</h2>
+...
+
+$ waypoint up
+
+» Building...
+Creating new buildpack-based image using builder: heroku/buildpacks:18
+✓ Creating pack client
+✓ Building image
+ │ [exporter] Reusing layer 'launcher'
+ │ [exporter] Reusing layer 'config'
+ │ [exporter] Adding label 'io.buildpacks.lifecycle.metadata'
+ │ [exporter] Adding label 'io.buildpacks.build.metadata'
+ │ [exporter] Adding label 'io.buildpacks.project.metadata'
+ │ [exporter] Saving index.docker.io/library/example-nodejs:latest...
+ │ [exporter] *** Images (126474a56d64):
+ │ [exporter]       index.docker.io/library/example-nodejs:latest
+ │ [exporter] Adding cache layer 'heroku/nodejs-engine:nodejs'
+ │ [exporter] Reusing cache layer 'heroku/nodejs-engine:toolbox'
+✓ Injecting entrypoint binary to image
+
+Generated new Docker image: example-nodejs:latest
+
+» Deploying...
+✓ Setting up waypoint network
+✓ Starting container
+✓ App deployed as container: example-nodejs-01F4NA7SD1KDV8D8XRZFW29535
+
+» Releasing...
+
+The deploy was successful! A Waypoint deployment URL is shown below. This
+can be used internally to check your deployment and is not meant for external
+traffic. You can manage this hostname using "waypoint hostname."
+
+           URL: https://mutually-genuine-mutt.waypoint.run
+Deployment URL: https://mutually-genuine-mutt--v2.waypoint.run
+```
+
+Chnage Endpoint URL and Build time is shorter than the first time.
+
+https://mutually-genuine-mutt--v2.waypoint.run
+
+![09](./img/09.jpg)
+
+Confirm docker.
+
+```bash
+$ docker ps -a
+CONTAINER ID        IMAGE                           COMMAND                  CREATED             STATUS                    PORTS                              NAMES
+b2ecf398f11b        example-nodejs:latest           "/waypoint-entrypoin…"   7 minutes ago       Up 7 minutes              0.0.0.0:32769->3000/tcp            example-nodejs-01F4NA7SD1KDV8D8XRZFW29535
+```
+
+```bash
+$ docker images
+REPOSITORY                                 TAG                 IMAGE ID            CREATED             SIZE
+example-nodejs                             latest              81cecd9524e7        9 minutes ago       672MB
+<none>                                     <none>              5b0f1f802134        About an hour ago   676MB
+heroku/pack                                18                  5b0f2a836e2f        About an hour ago   509MB
+heroku/pack                                <none>              
+...
+```
+
+Confirm waypoint ui, appear v2 build, deploy, release information.
+
+![10](./img/10.jpg)
+
+Click v1 Endpoint URL, displayed vi appllication.
+
+## 6. Clean up
+
+```bash
+$ waypoint destroy -auto-approve
+
+» Destroying releases for application 'example-nodejs'...
+
+» Destroying deployments for application 'example-nodejs'...
+Destroy successful!
+```
+
+Removed example application containers.
+
+```bash
+$ docker ps -a
+CONTAINER ID        IMAGE                           COMMAND                  CREATED             STATUS                    PORTS                              NAMES
+20b5ad61e781        hashicorp/waypoint:latest       "/usr/bin/waypoint r…"   15 hours ago        Up 15 hours                                                  waypoint-runner
+54254cd2321f        hashicorp/waypoint:latest       "/usr/bin/waypoint s…"   15 hours ago        Up 15 hours               0.0.0.0:9701-9702->9701-9702/tcp   waypoint-server
+```
+
+Remain example application images.
+
+```bash
+kmurakat@kmurakat-mac nodejs % docker images
+REPOSITORY                                 TAG                 IMAGE ID            CREATED             SIZE
+example-nodejs                             latest              81cecd9524e7        25 minutes ago      672MB
+<none>                                     <none>              5b0f1f802134        About an hour ago   676MB
+heroku/pack                                18                  5b0f2a836e2f        2 hours ago         509MB
+heroku/pack                                <none>                         67c0e8a0dbed        41 years ago        15.7MB
+heroku/buildpacks                          18                  cb0224238298        41 years ago        1.4GB
+heroku/buildpacks                          <none>              acb0e7a7bf70        41 years ago        1.4GB
+...
+```
+
+Remain Project and Builds Releases information, but remove Deployments[about docker containers]
+
+![11](./img/11.jpg)
+
+## 7. Other Commands
 
 ```bash
 $ waypoint project list 
@@ -332,7 +444,7 @@ $ waypoint artifact list
   ✔ |  1 | pack     | build:1 | 23 minutes ago | 23 minutes ago  
 ```
 
-## Reference
+## 8. Reference
 
 https://learn.hashicorp.com/tutorials/waypoint/get-started-install
 
